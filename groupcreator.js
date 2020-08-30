@@ -9,6 +9,24 @@ function isEmpty(str) {
     return str.replace(/^\s+|\s+$/gm,'').length == 0;
 }
 
+// Group class
+class Group {
+    // Constructor
+    constructor(id, objects) {
+        this.objects = objects ?? new Array();
+        this.id = id;
+    }
+    // Get HTML method
+    get HTML() {
+        let html = `<div class="col col-12 col-sm-6 col-md-4 col-lg-3 p-2"><div class="bg-dark-1 p-2 card"><h6>Group ${this.id}</h6><ul>`;
+        let htmlend = '</ul></div></div>';
+        this.objects.forEach(function(x) {
+            html += `<li>${x}</li>`;
+        });
+        return html + htmlend;
+    }
+}
+
 // Pageination code
 let currentpage = 0;
 function Next() {
@@ -59,21 +77,6 @@ function PageSpecificActions(targetPage) {
         case 0:
             // Page specific code for page 0
 
-            // Check if textarea is still invalid
-            let tempnames1 = document.getElementById("nameInput").value.split('\n');
-            names = new Array();
-            // Filter out whitespace lines
-            tempnames1.forEach(function(x) {
-                if (!isEmpty(x)) {
-                    names.push(x);
-                }
-            });
-
-            // Check if names has members
-            if (names.length != 0) {
-                document.getElementById("nameInput").className = "form-control";
-            }
-
             // Hide previous button
             document.getElementById("prev").style.display = "none";
 
@@ -97,6 +100,10 @@ function PageSpecificActions(targetPage) {
             if (names.length == 0) {
                 document.getElementById("nameInput").className = "form-control is-invalid";
                 throw "No names supplied";
+            }
+            // If it has members, remove the invalid class.
+            else {
+                document.getElementById("nameInput").className = "form-control";
             }
 
             // Set numbers
@@ -126,6 +133,42 @@ function PageSpecificActions(targetPage) {
             break;
         case 2:
             // Page specific code for page 2
+
+            // Create the groups and render them
+            // Shuffle names
+            names = shuffle(names);
+
+            // Define group array
+            let grps = new Array();
+
+            // Loop through groups
+            let sliceidx = 0;
+            for (i = 0; i < totgrp; i++) {
+                // Calculate end index
+                let endidx = sliceidx + objgrp;
+
+                // Check if end index is out of bounds
+                if (endidx > names.length) {
+                    endidx = names.lenght;
+                }
+
+                // Push slice to groups array
+                grps.push(new Group(i, names.slice(sliceidx, endidx)));
+
+                // Increment sliceidx
+                sliceidx += objgrp;
+            }
+
+            // Render HTML
+
+            // Clear the div
+            document.getElementById("groups").innerHTML = "";
+
+            // Loop through groups
+            grps.forEach(function(x) {
+                document.getElementById("groups").innerHTML += x.HTML;
+            });
+
 
             // Hide next button
             document.getElementById("next").style.display = "none";
@@ -164,4 +207,25 @@ function upDateSliderValue() {
         document.getElementById("totgrp").innerHTML = totgrp;
         document.getElementById("totgrpipt").value = totgrp;
     }
+}
+
+// Array shufler
+
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
 }
